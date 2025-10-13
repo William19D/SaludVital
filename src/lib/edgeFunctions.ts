@@ -161,6 +161,89 @@ export interface AppointmentResponse {
   };
 }
 
+export interface UserAppointment {
+  id: string;
+  appointment_info: {
+    date: string;
+    time: string;
+    end_time: string;
+    duration_minutes: number;
+    status: {
+      value: string;
+      label: string;
+      color: string;
+      description: string;
+    };
+    type: {
+      value: string;
+      label: string;
+      icon: string;
+    };
+    is_upcoming: boolean;
+    time_until: string;
+  };
+  details: {
+    reason: string;
+    notes?: string;
+    reminder_sent: boolean;
+  };
+  cancellation?: {
+    reason?: string;
+    cancelled_by?: string;
+    cancelled_at?: string;
+  } | null;
+  timestamps: {
+    created_at: string;
+    updated_at: string;
+  };
+  doctor?: {
+    id: string;
+    name: string;
+    specialization: string;
+    consultation_fee: number;
+    phone?: string;
+    avatar_url?: string;
+    rating: number;
+    total_reviews: number;
+  };
+  patient?: {
+    id: string;
+    name: string;
+    phone?: string;
+    date_of_birth?: string;
+    gender?: string;
+    avatar_url?: string;
+    medical_info?: {
+      blood_type?: string;
+      allergies?: string[];
+      chronic_conditions?: string[];
+    };
+  };
+}
+
+export interface UserAppointmentsResponse {
+  appointments: UserAppointment[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+    has_more: boolean;
+  };
+  statistics: {
+    total_appointments: number;
+    upcoming_appointments: number;
+    status_breakdown: Record<string, number>;
+    type_breakdown: Record<string, number>;
+  };
+  next_appointment?: UserAppointment | null;
+  metadata: {
+    user_role: string;
+    user_info: any;
+    filters_applied: any;
+    timestamp: string;
+  };
+}
+
 export interface DoctorInfo {
   id: string;
   personal_info: {
@@ -270,6 +353,46 @@ export default {
       appointment_type: data.appointment_type || 'routine',
       reason: data.reason
     }, token);
+  },
+  
+  // Obtener citas del usuario actual
+  getUserAppointments: async (
+    filters?: { 
+      status?: string; 
+      date_from?: string; 
+      date_to?: string; 
+      upcoming?: boolean; 
+      limit?: number; 
+      offset?: number; 
+      sort_by?: string; 
+      sort_order?: string; 
+    }, 
+    token?: string
+  ): Promise<UserAppointmentsResponse> => {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.date_from) params.append('date_from', filters.date_from);
+    if (filters?.date_to) params.append('date_to', filters.date_to);
+    if (filters?.upcoming) params.append('upcoming', 'true');
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.offset) params.append('offset', filters.offset.toString());
+    if (filters?.sort_by) params.append('sort_by', filters.sort_by);
+    if (filters?.sort_order) params.append('sort_order', filters.sort_order);
+    
+    const url = `${FUNCTIONS_BASE_URL}/get-user-appointments${params.toString() ? `?${params.toString()}` : ''}`;
+    
+    const response = await fetch(url, { 
+      headers: getHeaders(token),
+      method: 'GET'
+    });
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Error obteniendo citas del usuario');
+    }
+    
+    return result.data;
   },
   getDoctors: async (filters?: { 
     specialization?: string, 

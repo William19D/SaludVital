@@ -190,8 +190,11 @@ const Citas = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
+  const [loadingCitas, setLoadingCitas] = useState(false);
   
   const [citas, setCitas] = useState<Cita[]>([]);
+  const [citasUsuario, setCitasUsuario] = useState<any[]>([]);
+  const [estadisticas, setEstadisticas] = useState<any>(null);
   const [doctores, setDoctores] = useState<Doctor[]>([]);
   const [especialidades, setEspecialidades] = useState<string[]>([]);
 
@@ -208,7 +211,34 @@ const Citas = () => {
   // Cargar doctores y especialidades
   useEffect(() => {
     cargarDoctores();
+    cargarCitasUsuario();
   }, []);
+
+  const cargarCitasUsuario = async () => {
+    if (!token) return;
+    
+    setLoadingCitas(true);
+    try {
+      console.log('📅 Cargando citas del usuario...');
+      
+      const response = await edgeFunctions.getUserAppointments({
+        upcoming: false, // Obtener todas las citas
+        sort_by: 'appointment_date',
+        sort_order: 'desc',
+        limit: 20
+      }, token);
+      
+      console.log('✅ Citas del usuario:', response);
+      setCitasUsuario(response.appointments);
+      setEstadisticas(response.statistics);
+      
+    } catch (error: any) {
+      console.error('❌ Error cargando citas:', error);
+      toast.error('Error cargando tus citas: ' + (error.message || 'Error desconocido'));
+    } finally {
+      setLoadingCitas(false);
+    }
+  };
 
   const cargarDoctores = async () => {
     setLoadingDoctors(true);
@@ -316,7 +346,9 @@ const Citas = () => {
         especialidad: ''
       });
       
-      // Aquí podrías recargar las citas del paciente si tienes esa funcionalidad
+      // Recargar las citas del usuario
+      cargarCitasUsuario();
+      
       console.log('📋 Cita creada:', {
         id: response.appointment.id,
         fecha: response.appointment.appointment_date,
@@ -636,9 +668,66 @@ const Citas = () => {
           )}
         </div>
 
+        {/* Estadísticas de Citas */}
+        {estadisticas && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total de Citas</p>
+                    <p className="text-2xl font-bold">{estadisticas.total_appointments}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Próximas</p>
+                    <p className="text-2xl font-bold">{estadisticas.upcoming_appointments}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Completadas</p>
+                    <p className="text-2xl font-bold">{estadisticas.status_breakdown?.completed || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Agendadas</p>
+                    <p className="text-2xl font-bold">{estadisticas.status_breakdown?.scheduled || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Lista de Citas */}
         <div className="grid gap-4">
-          {citas.length === 0 ? (
+          {loadingCitas ? (
+            <Card>
+              <CardContent className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin mr-2" />
+                <span>Cargando tus citas...</span>
+              </CardContent>
+            </Card>
+          ) : citasUsuario.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
@@ -658,35 +747,102 @@ const Citas = () => {
               </CardContent>
             </Card>
           ) : (
-            citas.map((cita) => (
-              <Card key={cita.id}>
+            citasUsuario.map((cita) => (
+              <Card key={cita.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4 text-primary" />
-                        <span className="font-medium">
-                          {cita.doctor?.profiles?.full_name || 'Doctor no especificado'}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEstadoColor(cita.status)}`}>
-                          {formatearEstado(cita.status)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {formatearFecha(cita.appointment_date)}
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                          <Stethoscope className="h-5 w-5 text-white" />
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {cita.appointment_time} ({cita.duration_minutes} min)
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-lg">
+                              Dr. {cita.doctor?.name || 'Doctor no especificado'}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              cita.appointment_info.status.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                              cita.appointment_info.status.color === 'green' ? 'bg-green-100 text-green-800' :
+                              cita.appointment_info.status.color === 'red' ? 'bg-red-100 text-red-800' :
+                              cita.appointment_info.status.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {cita.appointment_info.status.label}
+                            </span>
+                          </div>
+                          <p className="text-sm text-blue-600 font-medium flex items-center gap-1">
+                            {getEspecialidadIcon(cita.doctor?.specialization || '')}
+                            {cita.doctor?.specialization}
+                          </p>
                         </div>
                       </div>
-                      <p className="text-sm">{cita.reason}</p>
-                      {cita.doctor?.specialization && (
-                        <span className="text-sm text-muted-foreground">
-                          {cita.doctor.specialization}
-                        </span>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {new Date(cita.appointment_info.date).toLocaleDateString('es-ES', {
+                              weekday: 'short',
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>{cita.appointment_info.time} - {cita.appointment_info.end_time}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                            {cita.appointment_info.type.icon} {cita.appointment_info.type.label}
+                          </span>
+                          {cita.appointment_info.is_upcoming && (
+                            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
+                              {cita.appointment_info.time_until}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="border-t pt-3">
+                        <p className="text-sm"><strong>Motivo:</strong> {cita.details.reason}</p>
+                        {cita.details.notes && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            <strong>Notas:</strong> {cita.details.notes}
+                          </p>
+                        )}
+                      </div>
+
+                      {cita.doctor && (
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground border-t pt-3">
+                          <div className="flex items-center gap-1">
+                            <span>⭐</span>
+                            <span>{cita.doctor.rating.toFixed(1)} ({cita.doctor.total_reviews} reseñas)</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span>💰</span>
+                            <span>${cita.doctor.consultation_fee}</span>
+                          </div>
+                          {cita.doctor.phone && (
+                            <div className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              <span>{cita.doctor.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      {cita.cancellation && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
+                          <p className="text-sm text-red-800">
+                            <strong>Cancelada:</strong> {cita.cancellation.reason}
+                          </p>
+                          <p className="text-xs text-red-600 mt-1">
+                            Cancelada el {new Date(cita.cancellation.cancelled_at || '').toLocaleDateString('es-ES')}
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
