@@ -54,6 +54,10 @@ describe('Inicio de sesión en Salud Vital', () => {
     cy.get('button[type="submit"]').click();
 
     cy.wait('@loginUser');
-    cy.contains('Credenciales inválidas').should('be.visible');
+    // Puede aparecer el mensaje del backend o el mensaje genérico del UI
+    cy.contains(/(Credenciales inválidas|Error al iniciar sesión\. Verifica tus credenciales\.)/)
+      .should('be.visible');
+    // No debe redirigir al dashboard
+    cy.url().should('include', '/auth');
   });
 });
