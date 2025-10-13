@@ -42,21 +42,21 @@ export const AppSidebar = () => {
   );
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-card">
-      <SidebarHeader className="border-b p-4">
+    <Sidebar collapsible="offcanvas" className="border-r" style={{ backgroundColor: '#d3def3' }}>
+      <SidebarHeader className="border-b border-gray-300 p-4" style={{ backgroundColor: '#d3def3' }}>
         <div className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
             <Heart className="h-6 w-6 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-black">Salud Vital</span>
-            <span className="text-xs text-black">Sistema Médico</span>
+            <span className="text-sm font-semibold" style={{ color: '#454545' }}>Salud Vital</span>
+            <span className="text-xs" style={{ color: '#454545', opacity: 0.7 }}>Sistema Médico</span>
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="bg-card">
+      <SidebarContent style={{ backgroundColor: '#d3def3' }}>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-black px-4 py-2 font-semibold">
+          <SidebarGroupLabel className="px-4 py-2 font-semibold" style={{ color: '#454545' }}>
             Navegación
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -71,12 +71,15 @@ export const AppSidebar = () => {
                         `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                           isActive
                             ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                            : 'text-black hover:bg-accent'
+                            : 'hover:bg-black/10'
                         }`
                       }
+                      style={{
+                        color: '#454545 !important'
+                      }}
                     >
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-5 w-5 shrink-0" style={{ color: '#454545' }} />
+                      <span style={{ color: '#454545' }}>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -85,11 +88,12 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto border-t">
+        <SidebarGroup className="mt-auto border-t border-gray-300">
           <SidebarGroupContent className="p-2">
             <Button
               variant="ghost"
-              className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="w-full justify-start hover:bg-red-100"
+              style={{ color: '#dc2626' }}
               onClick={logout}
             >
               <LogOut className="mr-2 h-5 w-5" />
