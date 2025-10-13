@@ -6,12 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import Citas from "./pages/Citas";
-import Resultados from "./pages/Resultados";
-import Alertas from "./pages/Alertas";
-import Configuracion from "./pages/Configuracion";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -25,12 +20,13 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/auth" replace />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<Navigate to="/dashboard/citas" replace />} />
             <Route path="/dashboard/citas" element={<ProtectedRoute><Citas /></ProtectedRoute>} />
-            <Route path="/dashboard/resultados" element={<ProtectedRoute><Resultados /></ProtectedRoute>} />
-            <Route path="/dashboard/alertas" element={<ProtectedRoute><Alertas /></ProtectedRoute>} />
-            <Route path="/dashboard/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
+            {/* Rutas deshabilitadas - redirigen a citas */}
+            <Route path="/dashboard/resultados" element={<Navigate to="/dashboard/citas" replace />} />
+            <Route path="/dashboard/alertas" element={<Navigate to="/dashboard/citas" replace />} />
+            <Route path="/dashboard/configuracion" element={<Navigate to="/dashboard/citas" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard/citas" replace />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

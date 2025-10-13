@@ -28,13 +28,13 @@ export const AppSidebar = () => {
   const { user, logout } = useAuth();
 
   const menuItems = [
-    { title: 'Inicio', url: '/dashboard', icon: Home, roles: ['admin', 'medico', 'paciente'] },
+    // { title: 'Inicio', url: '/dashboard', icon: Home, roles: ['admin', 'medico', 'paciente'] },
     { title: 'Citas', url: '/dashboard/citas', icon: Calendar, roles: ['admin', 'medico', 'paciente'] },
-    { title: 'Resultados', url: '/dashboard/resultados', icon: FileText, roles: ['admin', 'medico', 'paciente'] },
-    { title: 'Alertas', url: '/dashboard/alertas', icon: Bell, roles: ['admin', 'medico', 'paciente'] },
-    { title: 'Monitoreo', url: '/dashboard/monitoreo', icon: Activity, roles: ['admin'] },
-    { title: 'Usuarios', url: '/dashboard/usuarios', icon: Users, roles: ['admin'] },
-    { title: 'Configuración', url: '/dashboard/configuracion', icon: Settings, roles: ['admin', 'medico', 'paciente'] },
+    // { title: 'Resultados', url: '/dashboard/resultados', icon: FileText, roles: ['admin', 'medico', 'paciente'] },
+    // { title: 'Alertas', url: '/dashboard/alertas', icon: Bell, roles: ['admin', 'medico', 'paciente'] },
+    // { title: 'Monitoreo', url: '/dashboard/monitoreo', icon: Activity, roles: ['admin'] },
+    // { title: 'Usuarios', url: '/dashboard/usuarios', icon: Users, roles: ['admin'] },
+    // { title: 'Configuración', url: '/dashboard/configuracion', icon: Settings, roles: ['admin', 'medico', 'paciente'] },
   ];
 
   const visibleItems = menuItems.filter(item => 
