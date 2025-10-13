@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,6 @@ const Auth = () => {
     email: '',
     password: '',
     name: '',
-    role: 'paciente' as UserRole, // Siempre paciente
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -37,7 +36,8 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await register(registerData.email, registerData.password, registerData.name, registerData.role);
+      // Siempre registrar como paciente
+      await register(registerData.email, registerData.password, registerData.name);
       toast.success('Registro exitoso');
     } catch (error) {
       toast.error('Error al registrar. Intenta nuevamente.');

@@ -45,7 +45,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
+  register: (email: string, password: string, name: string, role?: UserRole) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -122,10 +122,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (email: string, password: string, name: string, role: UserRole) => {
+  const register = async (email: string, password: string, name: string, role?: UserRole) => {
     setIsLoading(true);
     try {
-      // El backend siempre crea pacientes en el endpoint de register
+      // Siempre registrar como paciente, ignorando el parámetro role
       const response = await edgeFunctions.register({ 
         email, 
         password, 
