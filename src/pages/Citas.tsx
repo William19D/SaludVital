@@ -450,8 +450,8 @@ const Citas = () => {
       });
       
       // Mostrar toast de éxito con información detallada
-      toast.success(`¡Cita agendada exitosamente! 🎉`, {
-        description: `${doctorSeleccionado?.professional_info.specialization} - Dr. ${response.doctor.name}\n📅 ${fechaFormateada} a las ${nuevaCita.appointment_time}\n⏱️ Duración: ${nuevaCita.duration_minutes} minutos\n💡 ${response.schedule_info.note}`,
+      toast.success(`¡Cita agendada exitosamente!`, {
+        description: `${doctorSeleccionado?.professional_info.specialization} - Dr. ${response.doctor.name}\nFecha: ${fechaFormateada} a las ${nuevaCita.appointment_time}\nDuración: ${nuevaCita.duration_minutes} minutos\nNota: ${response.schedule_info.note}`,
         duration: 6000,
       });
 
@@ -525,34 +525,41 @@ const Citas = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gestión de Citas</h1>
-            <p className="text-muted-foreground">
-              {user?.role === 'paciente' ? 'Agenda y gestiona tus citas médicas' : 'Gestiona las citas médicas'}
+        <div className="flex justify-between items-center mb-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold text-blue-600">
+              Gestión de Citas
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl">
+              {user?.role === 'paciente' 
+                ? 'Agenda y gestiona tus citas médicas de forma rápida y sencilla' 
+                : 'Gestiona las citas médicas del sistema de forma eficiente'
+              }
             </p>
           </div>
           
           {user?.role === 'paciente' && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Agendar Cita
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3 text-lg font-semibold rounded-xl">
+                  <Plus className="mr-3 h-6 w-6" />
+                  Agendar Nueva Cita
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
+              <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-white">
+                <DialogHeader className="border-b border-blue-100 pb-4">
+                  <DialogTitle className="flex items-center gap-3 text-2xl">
+                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-white" />
+                    </div>
                     Agendar Nueva Cita
                   </DialogTitle>
-                  <DialogDescription>
+                  <DialogDescription className="text-base text-gray-600 mt-2">
                     Completa la información para agendar tu cita médica. Todos los campos marcados con * son obligatorios.
                   </DialogDescription>
                 </DialogHeader>
                 
-                <div className="grid gap-6 py-4">
+                <div className="grid gap-8 py-6">
                   {/* Especialidad */}
                   <div className="grid gap-3">
                     <Label htmlFor="especialidad" className="text-sm font-medium">
@@ -620,57 +627,63 @@ const Citas = () => {
                           </div>
                         ) : (
                           doctoresFiltrados.map((doctor) => (
-                            <SelectItem key={doctor.id} value={doctor.id} className="p-0">
-                              <div className="w-full p-4 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0">
-                                <div className="flex items-start gap-4">
-                                  {/* Avatar */}
-                                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-                                    <Stethoscope className="h-7 w-7 text-white" />
+                            <SelectItem 
+                              key={doctor.id} 
+                              value={doctor.id} 
+                              className="p-0 hover:bg-blue-50/50 transition-all duration-200 ease-in-out focus:bg-blue-50/50 data-[highlighted]:bg-blue-50/50"
+                            >
+                              <div className="w-full p-3 border-b border-gray-100/50 last:border-b-0 rounded-md">
+                                <div className="flex items-center gap-3">
+                                  {/* Avatar - más pequeño */}
+                                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <Stethoscope className="h-5 w-5 text-white" />
                                   </div>
                                   
-                                  {/* Doctor info */}
+                                  {/* Doctor info - más compacto */}
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <h4 className="font-semibold text-base text-gray-900 truncate">
-                                        {doctor.personal_info.full_name}
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="font-semibold text-sm text-gray-900 truncate">
+                                        Dr. {doctor.personal_info.full_name}
                                       </h4>
-                                      <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full">
-                                        <span className="text-yellow-600 text-sm">⭐</span>
-                                        <span className="text-yellow-700 text-sm font-medium">
+                                      <div className="flex items-center gap-1 bg-yellow-100 px-1.5 py-0.5 rounded-full">
+                                        <User className="h-2.5 w-2.5 text-yellow-600" />
+                                        <span className="text-yellow-700 text-xs font-medium">
                                           {doctor.availability.rating.toFixed(1)}
                                         </span>
                                       </div>
                                     </div>
                                     
-                                    <p className="text-sm text-blue-600 font-medium mb-2 flex items-center gap-1">
+                                    <p className="text-xs text-blue-600 font-medium mb-1.5 flex items-center gap-1">
                                       {getEspecialidadIcon(doctor.professional_info.specialization)}
                                       {doctor.professional_info.specialization}
                                     </p>
                                     
-                                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-2">
-                                      <span className="flex items-center gap-1">
-                                        <User className="h-4 w-4" />
-                                        {doctor.professional_info.years_of_experience} años exp.
-                                      </span>
-                                      <span className="flex items-center gap-1">
-                                        <span>💬</span>
-                                        {doctor.availability.total_reviews} reseñas
-                                      </span>
-                                    </div>
-                                    
                                     <div className="flex items-center justify-between">
-                                      <span className="text-base font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                                        ${doctor.professional_info.consultation_fee}
-                                      </span>
-                                      {doctor.availability.next_available_slot && (
-                                        <span className="text-sm text-orange-700 bg-orange-100 px-3 py-1 rounded-full flex items-center gap-1">
-                                          <Calendar className="h-3 w-3" />
-                                          {new Date(doctor.availability.next_available_slot).toLocaleDateString('es-ES', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          })}
+                                      <div className="flex items-center gap-3 text-xs text-gray-600">
+                                        <span className="flex items-center gap-1">
+                                          <Clock className="h-3 w-3" />
+                                          {doctor.professional_info.years_of_experience} años
                                         </span>
-                                      )}
+                                        <span className="flex items-center gap-1">
+                                          <User className="h-3 w-3" />
+                                          {doctor.availability.total_reviews} reseñas
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                          ${doctor.professional_info.consultation_fee.toLocaleString()}
+                                        </span>
+                                        {doctor.availability.next_available_slot && (
+                                          <span className="text-xs text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                            <Calendar className="h-2.5 w-2.5" />
+                                            {new Date(doctor.availability.next_available_slot).toLocaleDateString('es-ES', {
+                                              month: 'short',
+                                              day: 'numeric'
+                                            })}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -681,8 +694,9 @@ const Citas = () => {
                       </SelectContent>
                     </Select>
                     {nuevaCita.especialidad && doctoresFiltrados.length === 0 && (
-                      <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                        ⚠️ No se encontraron doctores disponibles para <strong>{nuevaCita.especialidad}</strong>. 
+                      <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200 flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                        No se encontraron doctores disponibles para <strong>{nuevaCita.especialidad}</strong>. 
                         Intenta con otra especialidad.
                       </p>
                     )}
@@ -790,214 +804,315 @@ const Citas = () => {
           )}
         </div>
 
-        {/* Estadísticas de Citas */}
+        {/* Estadísticas de Citas Mejoradas */}
         {estadisticas && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total de Citas</p>
-                    <p className="text-2xl font-bold">{estadisticas.total_appointments}</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-blue-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Calendar className="h-7 w-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide">Total de Citas</p>
+                      <p className="text-3xl font-bold text-blue-900">{estadisticas.total_appointments}</p>
+                    </div>
                   </div>
+                  <div className="w-2 h-12 bg-blue-500 rounded-full"></div>
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Próximas</p>
-                    <p className="text-2xl font-bold">{estadisticas.upcoming_appointments}</p>
+            
+            <Card className="bg-green-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Clock className="h-7 w-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-green-600 font-semibold uppercase tracking-wide">Próximas</p>
+                      <p className="text-3xl font-bold text-green-900">{estadisticas.upcoming_appointments}</p>
+                    </div>
                   </div>
+                  <div className="w-2 h-12 bg-green-500 rounded-full"></div>
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Completadas</p>
-                    <p className="text-2xl font-bold">{estadisticas.status_breakdown?.completed || 0}</p>
+            
+            <Card className="bg-purple-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <User className="h-7 w-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-purple-600 font-semibold uppercase tracking-wide">Completadas</p>
+                      <p className="text-3xl font-bold text-purple-900">{estadisticas.status_breakdown?.completed || 0}</p>
+                    </div>
                   </div>
+                  <div className="w-2 h-12 bg-purple-500 rounded-full"></div>
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-orange-600" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Agendadas</p>
-                    <p className="text-2xl font-bold">{estadisticas.status_breakdown?.scheduled || 0}</p>
+            
+            <Card className="bg-orange-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-orange-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Activity className="h-7 w-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-orange-600 font-semibold uppercase tracking-wide">Agendadas</p>
+                      <p className="text-3xl font-bold text-orange-900">{estadisticas.status_breakdown?.scheduled || 0}</p>
+                    </div>
                   </div>
+                  <div className="w-2 h-12 bg-orange-500 rounded-full"></div>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Lista de Citas */}
-        <div className="grid gap-4">
+        {/* Lista de Citas Mejorada */}
+        <div className="space-y-6">
           {loadingCitas ? (
-            <Card>
-              <CardContent className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin mr-2" />
-                <span>Cargando tus citas...</span>
+            <Card className="border-0 shadow-lg bg-blue-50">
+              <CardContent className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">Cargando tus citas...</h3>
+                  <p className="text-gray-500">Un momento por favor mientras obtenemos tu información</p>
+                </div>
               </CardContent>
             </Card>
           ) : citasUsuario.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-semibold mb-2">No tienes citas programadas</h3>
-                <p className="text-muted-foreground text-center">
+            <Card className="border-0 shadow-lg bg-gray-50">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                  <Calendar className="h-12 w-12 text-blue-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No tienes citas programadas</h3>
+                <p className="text-gray-600 text-center text-lg mb-8 max-w-md">
                   {user?.role === 'paciente' 
-                    ? 'Agenda tu primera cita médica para comenzar'
-                    : 'No hay citas registradas en el sistema'
+                    ? 'Es el momento perfecto para agendar tu primera cita médica y cuidar de tu salud'
+                    : 'No hay citas registradas en el sistema actualmente'
                   }
                 </p>
                 {user?.role === 'paciente' && (
-                  <Button className="mt-4" onClick={() => setOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Agendar Primera Cita
+                  <Button 
+                    onClick={() => setOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 text-lg font-semibold rounded-xl"
+                  >
+                    <Plus className="mr-3 h-6 w-6" />
+                    Agendar Mi Primera Cita
                   </Button>
                 )}
               </CardContent>
             </Card>
           ) : (
             citasUsuario.map((cita) => (
-              <Card key={cita.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-3 flex-1">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                          <Stethoscope className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-lg">
-                              Dr. {cita.doctor?.name || 'Doctor no especificado'}
-                            </span>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              cita.appointment_info.status.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                              cita.appointment_info.status.color === 'green' ? 'bg-green-100 text-green-800' :
-                              cita.appointment_info.status.color === 'red' ? 'bg-red-100 text-red-800' :
-                              cita.appointment_info.status.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {cita.appointment_info.status.label}
-                            </span>
-                          </div>
-                          <p className="text-sm text-blue-600 font-medium flex items-center gap-1">
-                            {getEspecialidadIcon(cita.doctor?.specialization || '')}
-                            {cita.doctor?.specialization}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">
-                            {new Date(cita.appointment_info.date + 'T00:00:00').toLocaleDateString('es-ES', {
-                              weekday: 'short',
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            {cita.appointment_info.time.substring(0, 5)} - {cita.appointment_info.end_time}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
-                            {cita.appointment_info.type.icon} {cita.appointment_info.type.label}
-                          </span>
-                          {cita.appointment_info.is_upcoming && (
-                            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
-                              {cita.appointment_info.time_until}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="border-t pt-3">
-                        <p className="text-sm"><strong>Motivo:</strong> {cita.details.reason}</p>
-                        {cita.details.notes && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            <strong>Notas:</strong> {cita.details.notes}
-                          </p>
-                        )}
-                      </div>
+              <Card key={cita.id} className="hover:shadow-xl transition-all duration-300 border-0 bg-white overflow-hidden group">
+                <CardContent className="p-0">
+                  <div className="flex">
+                    {/* Barra lateral de color según estado */}
+                    <div className={`w-2 ${
+                      cita.appointment_info.status.color === 'blue' ? 'bg-gradient-to-b from-blue-400 to-blue-600' :
+                      cita.appointment_info.status.color === 'green' ? 'bg-gradient-to-b from-green-400 to-green-600' :
+                      cita.appointment_info.status.color === 'red' ? 'bg-gradient-to-b from-red-400 to-red-600' :
+                      cita.appointment_info.status.color === 'yellow' ? 'bg-gradient-to-b from-yellow-400 to-yellow-600' :
+                      'bg-gradient-to-b from-gray-400 to-gray-600'
+                    }`}></div>
 
-                      {cita.doctor && (
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground border-t pt-3">
-                          <div className="flex items-center gap-1">
-                            <span>⭐</span>
-                            <span>{cita.doctor.rating.toFixed(1)} ({cita.doctor.total_reviews} reseñas)</span>
+                    <div className="flex-1 p-6">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-4 flex-1">
+                          {/* Header con doctor y estado */}
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                                <Stethoscope className="h-8 w-8 text-white" />
+                              </div>
+                              {/* Badge de estado sobre el avatar */}
+                              <div className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-bold shadow-md ${
+                                cita.appointment_info.status.color === 'blue' ? 'bg-blue-500 text-white' :
+                                cita.appointment_info.status.color === 'green' ? 'bg-green-500 text-white' :
+                                cita.appointment_info.status.color === 'red' ? 'bg-red-500 text-white' :
+                                cita.appointment_info.status.color === 'yellow' ? 'bg-yellow-500 text-white' :
+                                'bg-gray-500 text-white'
+                              }`}>
+                                {cita.appointment_info.status.label}
+                              </div>
+                            </div>
+                            
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-900 mb-1">
+                                Dr. {cita.doctor?.name || 'Doctor no especificado'}
+                              </h3>
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="bg-blue-100 px-3 py-1 rounded-full flex items-center gap-1">
+                                  {getEspecialidadIcon(cita.doctor?.specialization || '')}
+                                  <span className="text-blue-800 text-sm font-semibold">
+                                    {cita.doctor?.specialization}
+                                  </span>
+                                </div>
+                                {cita.appointment_info.is_upcoming && (
+                                  <div className="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-3 py-1 rounded-full">
+                                    <span className="text-xs font-bold">{cita.appointment_info.time_until}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span>💰</span>
-                            <span>${cita.doctor.consultation_fee}</span>
+                          
+                          {/* Información de fecha y hora con mejor diseño */}
+                          <div className="bg-gray-50 rounded-2xl p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                  <Calendar className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Fecha</p>
+                                  <p className="font-bold text-gray-900">
+                                    {new Date(cita.appointment_info.date + 'T00:00:00').toLocaleDateString('es-ES', {
+                                      weekday: 'short',
+                                      day: 'numeric',
+                                      month: 'short'
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                  <Clock className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Horario</p>
+                                  <p className="font-bold text-gray-900">
+                                    {cita.appointment_info.time.substring(0, 5)} - {cita.appointment_info.end_time}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                  <Calendar className="h-6 w-6 text-purple-600" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Tipo</p>
+                                  <p className="font-bold text-gray-900">{cita.appointment_info.type.label}</p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          {cita.doctor.phone && (
-                            <div className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              <span>{cita.doctor.phone}</span>
+                          
+                          {/* Motivo de la cita */}
+                          <div className="bg-white border border-gray-200 rounded-xl p-4">
+                            <p className="text-sm text-gray-500 mb-1 font-medium">Motivo de consulta:</p>
+                            <p className="text-gray-900 font-medium">{cita.details.reason}</p>
+                            {cita.details.notes && (
+                              <div className="mt-2 pt-2 border-t border-gray-100">
+                                <p className="text-sm text-gray-500 mb-1 font-medium">Notas:</p>
+                                <p className="text-sm text-gray-700">{cita.details.notes}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Información del doctor */}
+                          {cita.doctor && (
+                            <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4">
+                              <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <User className="h-5 w-5 text-yellow-600" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-gray-500 font-medium">Calificación</p>
+                                    <p className="font-bold text-gray-900">
+                                      {cita.doctor.rating.toFixed(1)} ({cita.doctor.total_reviews} reseñas)
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <Pill className="h-5 w-5 text-green-600" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-gray-500 font-medium">Consulta</p>
+                                    <p className="font-bold text-green-600">${cita.doctor.consultation_fee.toLocaleString()}</p>
+                                  </div>
+                                </div>
+
+                                {cita.doctor.phone && (
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                      <Phone className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-gray-500 font-medium">Contacto</p>
+                                      <p className="font-medium text-gray-900">{cita.doctor.phone}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Información de cancelación */}
+                          {cita.cancellation && (
+                            <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <X className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="font-bold text-red-800 mb-1">Cita Cancelada</p>
+                                  <p className="text-sm text-red-700 mb-2"><strong>Motivo:</strong> {cita.cancellation.reason}</p>
+                                  <p className="text-xs text-red-600">
+                                    Cancelada el {new Date(cita.cancellation.cancelled_at || '').toLocaleDateString('es-ES', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Botones de acción mejorados */}
+                          {user?.role === 'paciente' && canModifyAppointment(cita) && (
+                            <div className="flex gap-3 pt-2">
+                              <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => openRescheduleDialog(cita)}
+                                className="flex-1 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-800 font-semibold transition-all duration-300"
+                              >
+                                <Edit3 className="h-5 w-5 mr-2" />
+                                Reagendar Cita
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => openCancelDialog(cita)}
+                                className="flex-1 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 hover:text-red-800 font-semibold transition-all duration-300"
+                              >
+                                <X className="h-5 w-5 mr-2" />
+                                Cancelar Cita
+                              </Button>
                             </div>
                           )}
                         </div>
-                      )}
-                      
-                      {cita.cancellation && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
-                          <p className="text-sm text-red-800">
-                            <strong>Cancelada:</strong> {cita.cancellation.reason}
-                          </p>
-                          <p className="text-xs text-red-600 mt-1">
-                            Cancelada el {new Date(cita.cancellation.cancelled_at || '').toLocaleDateString('es-ES', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Botones de acción */}
-                      {user?.role === 'paciente' && canModifyAppointment(cita) && (
-                        <div className="flex gap-2 pt-3 border-t">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openRescheduleDialog(cita)}
-                            className="flex-1"
-                          >
-                            <Edit3 className="h-4 w-4 mr-2" />
-                            Reagendar
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openCancelDialog(cita)}
-                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <X className="h-4 w-4 mr-2" />
-                            Cancelar
-                          </Button>
-                        </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
