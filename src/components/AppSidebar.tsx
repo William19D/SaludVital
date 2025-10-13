@@ -12,14 +12,8 @@ import {
   SidebarHeader,
 } from '@/components/ui/sidebar';
 import {
-  Home,
   Calendar,
-  FileText,
-  Bell,
-  Activity,
-  Settings,
   LogOut,
-  Users,
   Heart,
 } from 'lucide-react';
 import { Button } from './ui/button';

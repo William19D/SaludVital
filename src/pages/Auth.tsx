@@ -18,7 +18,7 @@ const Auth = () => {
     email: '',
     password: '',
     name: '',
-    role: 'paciente' as UserRole,
+    role: 'paciente' as UserRole, // Siempre paciente
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -129,22 +129,6 @@ const Auth = () => {
                     onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                     required
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-role">Tipo de Usuario</Label>
-                  <Select
-                    value={registerData.role}
-                    onValueChange={(value: UserRole) => setRegisterData({ ...registerData, role: value })}
-                  >
-                    <SelectTrigger id="register-role">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="paciente">Paciente</SelectItem>
-                      <SelectItem value="medico">Médico</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Registrando...' : 'Crear Cuenta'}
