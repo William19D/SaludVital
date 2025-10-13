@@ -244,6 +244,78 @@ export interface UserAppointmentsResponse {
   };
 }
 
+export interface CancelAppointmentParams {
+  appointment_id: string;
+  cancellation_reason: string;
+}
+
+export interface CancelAppointmentResponse {
+  appointment: {
+    id: string;
+    appointment_date: string;
+    appointment_time: string;
+    status: string;
+    cancellation_reason: string;
+    cancelled_at: string;
+  };
+  cancelled_by: {
+    user_id: string;
+    role: string;
+    email: string;
+  };
+  original_appointment: {
+    doctor_name: string;
+    patient_name: string;
+    specialization: string;
+    original_reason: string;
+  };
+}
+
+export interface RescheduleAppointmentParams {
+  appointment_id: string;
+  new_appointment_date: string;
+  new_appointment_time: string;
+  new_duration_minutes?: number;
+  reschedule_reason?: string;
+}
+
+export interface RescheduleAppointmentResponse {
+  appointment: {
+    id: string;
+    appointment_date: string;
+    appointment_time: string;
+    duration_minutes: number;
+    estimated_end_time: string;
+    status: string;
+    updated_at: string;
+  };
+  rescheduled_by: {
+    user_id: string;
+    role: string;
+    email: string;
+  };
+  changes: {
+    previous: {
+      date: string;
+      time: string;
+      duration: number;
+    };
+    new: {
+      date: string;
+      time: string;
+      duration: number;
+    };
+    reason: string;
+  };
+  doctor_info: {
+    name: string;
+    specialization: string;
+  };
+  patient_info: {
+    name: string;
+  };
+}
+
 export interface DoctorInfo {
   id: string;
   personal_info: {
@@ -393,6 +465,25 @@ export default {
     }
     
     return result.data;
+  },
+
+  // Cancelar una cita
+  cancelAppointment: async (data: CancelAppointmentParams, token: string): Promise<CancelAppointmentResponse> => {
+    return callEdgeFunction<CancelAppointmentResponse>('cancel-appointment', {
+      appointment_id: data.appointment_id,
+      cancellation_reason: data.cancellation_reason
+    }, token);
+  },
+
+  // Reagendar una cita
+  rescheduleAppointment: async (data: RescheduleAppointmentParams, token: string): Promise<RescheduleAppointmentResponse> => {
+    return callEdgeFunction<RescheduleAppointmentResponse>('reschedule-appointment', {
+      appointment_id: data.appointment_id,
+      new_appointment_date: data.new_appointment_date,
+      new_appointment_time: data.new_appointment_time,
+      new_duration_minutes: data.new_duration_minutes,
+      reschedule_reason: data.reschedule_reason
+    }, token);
   },
   getDoctors: async (filters?: { 
     specialization?: string, 

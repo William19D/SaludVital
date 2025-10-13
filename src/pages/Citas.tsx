@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, User, Stethoscope, Plus, MapPin, Phone, Loader2, Heart, Brain, Eye, Baby, Bone, Scissors, Activity, Zap, Shield, Microscope, Pill } from 'lucide-react';
+import { Calendar, Clock, User, Stethoscope, Plus, MapPin, Phone, Loader2, Heart, Brain, Eye, Baby, Bone, Scissors, Activity, Zap, Shield, Microscope, Pill, Edit3, X } from 'lucide-react';
 import { toast } from 'sonner';
 import edgeFunctions from '@/lib/edgeFunctions';
 
@@ -192,6 +192,16 @@ const Citas = () => {
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [loadingCitas, setLoadingCitas] = useState(false);
   
+  // Estados para gestión de citas
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [rescheduleReason, setRescheduleReason] = useState('');
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
+  const [newDuration, setNewDuration] = useState(30);
+  
   const [citas, setCitas] = useState<Cita[]>([]);
   const [citasUsuario, setCitasUsuario] = useState<any[]>([]);
   const [estadisticas, setEstadisticas] = useState<any>(null);
@@ -238,6 +248,118 @@ const Citas = () => {
     } finally {
       setLoadingCitas(false);
     }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!selectedAppointment || !cancelReason.trim()) {
+      toast.error('Por favor proporciona una razón para la cancelación');
+      return;
+    }
+
+    if (cancelReason.trim().length < 5) {
+      toast.error('La razón de cancelación debe tener al menos 5 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log('🚫 Cancelando cita:', selectedAppointment.id);
+      
+      const response = await edgeFunctions.cancelAppointment({
+        appointment_id: selectedAppointment.id,
+        cancellation_reason: cancelReason.trim()
+      }, token || '');
+
+      toast.success('¡Cita cancelada exitosamente! 📅', {
+        description: `La cita del ${new Date(response.appointment.appointment_date).toLocaleDateString('es-ES')} a las ${response.appointment.appointment_time} ha sido cancelada.`,
+        duration: 5000,
+      });
+
+      // Cerrar diálogo y limpiar estado
+      setCancelDialogOpen(false);
+      setSelectedAppointment(null);
+      setCancelReason('');
+      
+      // Recargar las citas
+      cargarCitasUsuario();
+      
+    } catch (error: any) {
+      console.error('❌ Error cancelando cita:', error);
+      toast.error(error.message || 'Error cancelando la cita. Intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRescheduleAppointment = async () => {
+    if (!selectedAppointment || !newDate || !newTime) {
+      toast.error('Por favor completa la nueva fecha y hora');
+      return;
+    }
+
+    if (rescheduleReason && rescheduleReason.trim().length < 5) {
+      toast.error('La razón de reagendamiento debe tener al menos 5 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log('🔄 Reagendando cita:', selectedAppointment.id);
+      
+      const response = await edgeFunctions.rescheduleAppointment({
+        appointment_id: selectedAppointment.id,
+        new_appointment_date: newDate,
+        new_appointment_time: newTime,
+        new_duration_minutes: newDuration !== selectedAppointment.appointment_info.duration_minutes ? newDuration : undefined,
+        reschedule_reason: rescheduleReason.trim() || undefined
+      }, token || '');
+
+      const fechaAnterior = new Date(response.changes.previous.date).toLocaleDateString('es-ES');
+      const fechaNueva = new Date(response.changes.new.date).toLocaleDateString('es-ES');
+
+      toast.success('¡Cita reagendada exitosamente! 🔄', {
+        description: `Cambiada de ${fechaAnterior} ${response.changes.previous.time} a ${fechaNueva} ${response.changes.new.time}`,
+        duration: 5000,
+      });
+
+      // Cerrar diálogo y limpiar estado
+      setRescheduleDialogOpen(false);
+      setSelectedAppointment(null);
+      setRescheduleReason('');
+      setNewDate('');
+      setNewTime('');
+      setNewDuration(30);
+      
+      // Recargar las citas
+      cargarCitasUsuario();
+      
+    } catch (error: any) {
+      console.error('❌ Error reagendando cita:', error);
+      toast.error(error.message || 'Error reagendando la cita. Intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openCancelDialog = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setCancelReason('');
+    setCancelDialogOpen(true);
+  };
+
+  const openRescheduleDialog = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setRescheduleReason('');
+    setNewDate(appointment.appointment_info.date);
+    setNewTime(appointment.appointment_info.time);
+    setNewDuration(appointment.appointment_info.duration_minutes);
+    setRescheduleDialogOpen(true);
+  };
+
+  const canModifyAppointment = (appointment: any) => {
+    const isUpcoming = appointment.appointment_info.is_upcoming;
+    const status = appointment.appointment_info.status.value;
+    return isUpcoming && (status === 'scheduled' || status === 'confirmed');
   };
 
   const cargarDoctores = async () => {
@@ -782,7 +904,7 @@ const Citas = () => {
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">
-                            {new Date(cita.appointment_info.date).toLocaleDateString('es-ES', {
+                            {new Date(cita.appointment_info.date + 'T00:00:00').toLocaleDateString('es-ES', {
                               weekday: 'short',
                               year: 'numeric',
                               month: 'short',
@@ -792,7 +914,9 @@ const Citas = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{cita.appointment_info.time} - {cita.appointment_info.end_time}</span>
+                          <span>
+                            {cita.appointment_info.time.substring(0, 5)} - {cita.appointment_info.end_time}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
@@ -844,6 +968,30 @@ const Citas = () => {
                           </p>
                         </div>
                       )}
+
+                      {/* Botones de acción */}
+                      {user?.role === 'paciente' && canModifyAppointment(cita) && (
+                        <div className="flex gap-2 pt-3 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openRescheduleDialog(cita)}
+                            className="flex-1"
+                          >
+                            <Edit3 className="h-4 w-4 mr-2" />
+                            Reagendar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openCancelDialog(cita)}
+                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Cancelar
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -851,6 +999,171 @@ const Citas = () => {
             ))
           )}
         </div>
+
+        {/* Diálogo de Cancelación */}
+        <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <X className="h-5 w-5" />
+                Cancelar Cita
+              </DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que deseas cancelar esta cita? Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedAppointment && (
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">Detalles de la cita:</h4>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Doctor:</strong> Dr. {selectedAppointment.doctor?.name}</p>
+                    <p><strong>Fecha:</strong> {new Date(selectedAppointment.appointment_info.date + 'T00:00:00').toLocaleDateString('es-ES', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}</p>
+                    <p><strong>Hora:</strong> {selectedAppointment.appointment_info.time.substring(0, 5)} - {selectedAppointment.appointment_info.end_time}</p>
+                    <p><strong>Especialidad:</strong> {selectedAppointment.doctor?.specialization}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cancel-reason">Razón de la cancelación *</Label>
+                  <Textarea
+                    id="cancel-reason"
+                    placeholder="Explica brevemente por qué cancelas la cita (mínimo 5 caracteres)"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {cancelReason.length}/5 caracteres mínimos
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setCancelDialogOpen(false)} disabled={loading}>
+                    No, mantener cita
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleCancelAppointment} 
+                    disabled={loading || cancelReason.trim().length < 5}
+                  >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Sí, cancelar cita
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Reagendamiento */}
+        <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-blue-600">
+                <Edit3 className="h-5 w-5" />
+                Reagendar Cita
+              </DialogTitle>
+              <DialogDescription>
+                Selecciona la nueva fecha y hora para tu cita médica.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedAppointment && (
+              <div className="space-y-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">Cita actual:</h4>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Doctor:</strong> Dr. {selectedAppointment.doctor?.name}</p>
+                    <p><strong>Fecha actual:</strong> {new Date(selectedAppointment.appointment_info.date + 'T00:00:00').toLocaleDateString('es-ES', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}</p>
+                    <p><strong>Hora actual:</strong> {selectedAppointment.appointment_info.time.substring(0, 5)} - {selectedAppointment.appointment_info.end_time}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-date">Nueva Fecha *</Label>
+                    <Input
+                      id="new-date"
+                      type="date"
+                      value={newDate}
+                      onChange={(e) => setNewDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-time">Nueva Hora *</Label>
+                    <Select value={newTime} onValueChange={setNewTime}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona hora" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horarios.map((hora) => (
+                          <SelectItem key={hora} value={hora}>
+                            {hora}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="new-duration">Duración (minutos)</Label>
+                  <Select value={newDuration.toString()} onValueChange={(val) => setNewDuration(parseInt(val))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutos</SelectItem>
+                      <SelectItem value="30">30 minutos</SelectItem>
+                      <SelectItem value="45">45 minutos</SelectItem>
+                      <SelectItem value="60">60 minutos</SelectItem>
+                      <SelectItem value="90">90 minutos</SelectItem>
+                      <SelectItem value="120">120 minutos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reschedule-reason">Razón del reagendamiento (opcional)</Label>
+                  <Textarea
+                    id="reschedule-reason"
+                    placeholder="Explica brevemente por qué reagendas la cita"
+                    value={rescheduleReason}
+                    onChange={(e) => setRescheduleReason(e.target.value)}
+                    className="min-h-[60px]"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setRescheduleDialogOpen(false)} disabled={loading}>
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={handleRescheduleAppointment} 
+                    disabled={loading || !newDate || !newTime}
+                  >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Reagendar Cita
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
