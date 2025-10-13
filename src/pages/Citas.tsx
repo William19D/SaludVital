@@ -271,7 +271,7 @@ const Citas = () => {
       }, token || '');
 
       toast.success('¡Cita cancelada exitosamente! 📅', {
-        description: `La cita del ${new Date(response.appointment.appointment_date).toLocaleDateString('es-ES')} a las ${response.appointment.appointment_time} ha sido cancelada.`,
+        description: `La cita del ${new Date(response.appointment.appointment_date + 'T00:00:00').toLocaleDateString('es-ES')} a las ${response.appointment.appointment_time.substring(0, 5)} ha sido cancelada.`,
         duration: 5000,
       });
 
@@ -314,11 +314,11 @@ const Citas = () => {
         reschedule_reason: rescheduleReason.trim() || undefined
       }, token || '');
 
-      const fechaAnterior = new Date(response.changes.previous.date).toLocaleDateString('es-ES');
-      const fechaNueva = new Date(response.changes.new.date).toLocaleDateString('es-ES');
+      const fechaAnterior = new Date(response.changes.previous.date + 'T00:00:00').toLocaleDateString('es-ES');
+      const fechaNueva = new Date(response.changes.new.date + 'T00:00:00').toLocaleDateString('es-ES');
 
       toast.success('¡Cita reagendada exitosamente! 🔄', {
-        description: `Cambiada de ${fechaAnterior} ${response.changes.previous.time} a ${fechaNueva} ${response.changes.new.time}`,
+        description: `Cambiada de ${fechaAnterior} ${response.changes.previous.time.substring(0, 5)} a ${fechaNueva} ${response.changes.new.time.substring(0, 5)}`,
         duration: 5000,
       });
 
@@ -351,7 +351,7 @@ const Citas = () => {
     setSelectedAppointment(appointment);
     setRescheduleReason('');
     setNewDate(appointment.appointment_info.date);
-    setNewTime(appointment.appointment_info.time);
+    setNewTime(appointment.appointment_info.time.substring(0, 5)); // Convertir de "HH:MM:SS" a "HH:MM"
     setNewDuration(appointment.appointment_info.duration_minutes);
     setRescheduleDialogOpen(true);
   };
@@ -964,7 +964,13 @@ const Citas = () => {
                             <strong>Cancelada:</strong> {cita.cancellation.reason}
                           </p>
                           <p className="text-xs text-red-600 mt-1">
-                            Cancelada el {new Date(cita.cancellation.cancelled_at || '').toLocaleDateString('es-ES')}
+                            Cancelada el {new Date(cita.cancellation.cancelled_at || '').toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </p>
                         </div>
                       )}
