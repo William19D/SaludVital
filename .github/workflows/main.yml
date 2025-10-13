@@ -13,11 +13,12 @@ jobs:
     steps:
       - name: 🧾 Checkout del repositorio
         uses: actions/checkout@v4
-
+  
       - name: ⚙️ Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20.19.0
+
 
       - name: 📦 Instalar dependencias
         run: npm ci
@@ -30,8 +31,8 @@ jobs:
         with:
           build: npm run build
           start: npm start
-          wait-on: 'http://localhost:3000'
-          browser: chrome
+          wait-on: 'http://localhost:8080' 
+          browser: chrome 
           spec: cypress/e2e/**/*.cy.ts
 
   # --- ETAPA 2: Desplegar en la nube ---
@@ -49,7 +50,7 @@ jobs:
         with:
           node-version: 18
 
-      # 👉 Aquí puedes cambiar según tu proveedor de hosting (Vercel, Render, etc.)
+  
       - name: 🚀 Desplegar en Vercel
         uses: amondnet/vercel-action@v25
         with:
