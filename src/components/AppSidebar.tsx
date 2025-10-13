@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
+  SidebarHeader,
 } from '@/components/ui/sidebar';
 import {
   Home,
@@ -20,13 +20,12 @@ import {
   Settings,
   LogOut,
   Users,
+  Heart,
 } from 'lucide-react';
 import { Button } from './ui/button';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
-  const { state } = useSidebar();
-  const isCollapsed = state === 'collapsed';
 
   const menuItems = [
     { title: 'Inicio', url: '/dashboard', icon: Home, roles: ['admin', 'medico', 'paciente'] },
@@ -43,11 +42,22 @@ export const AppSidebar = () => {
   );
 
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar collapsible="icon" className="border-r bg-card">
+      <SidebarHeader className="border-b p-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+            <Heart className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-black">Salud Vital</span>
+            <span className="text-xs text-black">Sistema Médico</span>
+          </div>
+        </div>
+      </SidebarHeader>
+      <SidebarContent className="bg-card">
         <SidebarGroup>
-          <SidebarGroupLabel>
-            {!isCollapsed && 'Navegación'}
+          <SidebarGroupLabel className="text-black px-4 py-2 font-semibold">
+            Navegación
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -58,13 +68,15 @@ export const AppSidebar = () => {
                       to={item.url}
                       end={item.url === '/dashboard'}
                       className={({ isActive }) =>
-                        isActive
-                          ? 'bg-primary text-primary-foreground hover:bg-primary-hover'
-                          : 'hover:bg-accent'
+                        `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            : 'text-black hover:bg-accent'
+                        }`
                       }
                     >
-                      <item.icon className="w-5 h-5" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -73,15 +85,15 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupContent>
+        <SidebarGroup className="mt-auto border-t">
+          <SidebarGroupContent className="p-2">
             <Button
               variant="ghost"
               className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={logout}
             >
-              <LogOut className="w-5 h-5" />
-              {!isCollapsed && <span className="ml-2">Cerrar Sesión</span>}
+              <LogOut className="mr-2 h-5 w-5" />
+              <span>Cerrar Sesión</span>
             </Button>
           </SidebarGroupContent>
         </SidebarGroup>
