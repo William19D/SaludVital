@@ -1,7 +1,7 @@
 describe('Inicio de sesión en Salud Vital', () => {
   beforeEach(() => {
-    // Mock de Edge Function login
-    cy.intercept('POST', '**/functions/v1/login', (req) => {
+    // Mock de Edge Function login (URL exacta de Supabase)
+    cy.intercept('POST', 'https://fbstreidlkukbaqtlpon.supabase.co/functions/v1/login', (req) => {
       const { email, password } = req.body;
       if (email === 'juanperez@test.com' && password === '12345678') {
         req.reply({
