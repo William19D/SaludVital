@@ -43,6 +43,7 @@ interface Tokens {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
   logout: () => void;
@@ -62,9 +63,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedUser = localStorage.getItem('saludvital_user');
     const savedTokens = localStorage.getItem('saludvital_tokens');
     
+    console.log('🔍 AuthContext - Verificando localStorage:');
+    console.log('   - savedUser:', savedUser ? 'EXISTE' : 'NO EXISTE');
+    console.log('   - savedTokens:', savedTokens ? 'EXISTE' : 'NO EXISTE');
+    
     if (savedUser && savedTokens) {
-      setUser(JSON.parse(savedUser));
-      setTokens(JSON.parse(savedTokens));
+      const userObj = JSON.parse(savedUser);
+      const tokensObj = JSON.parse(savedTokens);
+      
+      console.log('✅ Restaurando sesión:', userObj.email, userObj.role);
+      console.log('🔑 Token JWT:', tokensObj.access_token?.substring(0, 50) + '...');
+      
+      setUser(userObj);
+      setTokens(tokensObj);
+    } else {
+      console.log('❌ No hay sesión guardada');
     }
     setIsLoading(false);
   }, []);
@@ -72,7 +85,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      console.log('🔐 Iniciando login para:', email);
       const response = await edgeFunctions.login({ email, password });
+      
+      console.log('✅ Respuesta de login:', {
+        user: response.user,
+        hasTokens: !!response.tokens,
+        tokenType: response.tokens?.token_type,
+        expiresIn: response.tokens?.expires_in
+      });
       
       const userData: User = {
         id: response.user.id,
@@ -87,10 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('saludvital_user', JSON.stringify(userData));
       localStorage.setItem('saludvital_tokens', JSON.stringify(response.tokens));
       
+      console.log('💾 Sesión guardada en localStorage');
+      
       toast.success('Inicio de sesión exitoso');
       navigate('/dashboard');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión';
+      console.error('❌ Error en login:', errorMessage);
       toast.error(errorMessage);
       throw error;
     } finally {
@@ -149,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token: tokens?.access_token || null, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
