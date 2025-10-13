@@ -23,14 +23,12 @@ interface Cita {
 const Citas = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [citas, setCitas] = useState<Cita[]>([
-    { id: '1', paciente: 'Juan Pérez', medico: 'Dr. García', fecha: '2025-10-14', hora: '10:00', especialidad: 'Cardiología', estado: 'programada' },
-    { id: '2', paciente: 'María López', medico: 'Dr. Rodríguez', fecha: '2025-10-14', hora: '11:30', especialidad: 'Medicina General', estado: 'programada' },
-    { id: '3', paciente: 'Carlos Gómez', medico: 'Dr. García', fecha: '2025-10-15', hora: '09:00', especialidad: 'Cardiología', estado: 'programada' },
-  ]);
+  
+  // TODO: Cargar citas desde Supabase
+  const [citas, setCitas] = useState<Cita[]>([]);
 
   const [nuevaCita, setNuevaCita] = useState({
-    paciente: user?.role === 'paciente' ? user.name : '',
+    paciente: user?.role === 'paciente' ? user.full_name : '',
     medico: '',
     fecha: '',
     hora: '',
@@ -38,6 +36,7 @@ const Citas = () => {
   });
 
   const handleCrearCita = () => {
+    // TODO: Guardar cita en Supabase
     const cita: Cita = {
       id: Date.now().toString(),
       paciente: nuevaCita.paciente,
@@ -50,7 +49,7 @@ const Citas = () => {
     setCitas([...citas, cita]);
     setOpen(false);
     toast.success('Cita agendada exitosamente');
-    setNuevaCita({ paciente: user?.role === 'paciente' ? user.name : '', medico: '', fecha: '', hora: '', especialidad: '' });
+    setNuevaCita({ paciente: user?.role === 'paciente' ? user.full_name : '', medico: '', fecha: '', hora: '', especialidad: '' });
   };
 
   const getEstadoColor = (estado: string) => {
@@ -108,9 +107,7 @@ const Citas = () => {
                       <SelectValue placeholder="Selecciona un médico" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Dr. García">Dr. García</SelectItem>
-                      <SelectItem value="Dr. Rodríguez">Dr. Rodríguez</SelectItem>
-                      <SelectItem value="Dra. Martínez">Dra. Martínez</SelectItem>
+                      {/* TODO: Cargar médicos desde Supabase */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -121,10 +118,7 @@ const Citas = () => {
                       <SelectValue placeholder="Selecciona especialidad" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Cardiología">Cardiología</SelectItem>
-                      <SelectItem value="Medicina General">Medicina General</SelectItem>
-                      <SelectItem value="Pediatría">Pediatría</SelectItem>
-                      <SelectItem value="Dermatología">Dermatología</SelectItem>
+                      {/* TODO: Cargar especialidades desde Supabase */}
                     </SelectContent>
                   </Select>
                 </div>

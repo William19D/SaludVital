@@ -29,31 +29,16 @@ const Dashboard = () => {
     user && action.roles.includes(user.role)
   );
 
-  const stats = user?.role === 'admin' 
-    ? [
-        { label: 'Usuarios Activos', value: '248', change: '+12%' },
-        { label: 'Citas Hoy', value: '34', change: '+5%' },
-        { label: 'Médicos', value: '18', change: '0%' },
-        { label: 'Alertas Pendientes', value: '7', change: '-3%' },
-      ]
-    : user?.role === 'medico'
-    ? [
-        { label: 'Citas Hoy', value: '8', change: '+2' },
-        { label: 'Pacientes', value: '45', change: '+3' },
-        { label: 'Resultados Pendientes', value: '5', change: '-1' },
-      ]
-    : [
-        { label: 'Próxima Cita', value: 'Mañana', change: '10:00 AM' },
-        { label: 'Resultados Nuevos', value: '2', change: 'Ver' },
-        { label: 'Alertas', value: '1', change: 'Revisar' },
-      ];
+  // TODO: Obtener estadísticas desde Supabase
+  const stats = [];
+
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold text-foreground">
-            Bienvenido, {user?.name}
+            Bienvenido, {user?.full_name}
           </h2>
           <p className="text-muted-foreground mt-1">
             Rol: {getRoleName(user?.role || '')}
@@ -107,22 +92,10 @@ const Dashboard = () => {
               <CardDescription>Tus citas programadas</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Dr. García - Cardiología</p>
-                    <p className="text-sm text-muted-foreground">Mañana, 10:00 AM</p>
-                  </div>
-                  <Button size="sm">Ver Detalles</Button>
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Dr. López - Medicina General</p>
-                    <p className="text-sm text-muted-foreground">15 May, 3:00 PM</p>
-                  </div>
-                  <Button size="sm">Ver Detalles</Button>
-                </div>
-              </div>
+              {/* TODO: Cargar citas desde Supabase */}
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No hay citas programadas
+              </p>
             </CardContent>
           </Card>
         )}

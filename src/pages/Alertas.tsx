@@ -15,12 +15,9 @@ interface Alerta {
 }
 
 const Alertas = () => {
-  const alertas: Alerta[] = [
-    { id: '1', tipo: 'cita', titulo: 'Cita Próxima', mensaje: 'Tienes una cita mañana a las 10:00 AM con Dr. García', fecha: '2025-10-13', prioridad: 'alta', leida: false },
-    { id: '2', tipo: 'resultado', titulo: 'Resultados Disponibles', mensaje: 'Tus resultados de análisis de sangre están listos', fecha: '2025-10-12', prioridad: 'media', leida: false },
-    { id: '3', tipo: 'medicamento', titulo: 'Recordatorio de Medicación', mensaje: 'No olvides tomar tu medicación de las 8:00 PM', fecha: '2025-10-13', prioridad: 'alta', leida: false },
-    { id: '4', tipo: 'general', titulo: 'Actualización del Sistema', mensaje: 'Nuevas funcionalidades disponibles en la plataforma', fecha: '2025-10-11', prioridad: 'baja', leida: true },
-  ];
+  // TODO: Cargar alertas desde Supabase
+  const alertas: Alerta[] = [];
+
 
   const getIcono = (tipo: string) => {
     switch (tipo) {

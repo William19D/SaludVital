@@ -93,16 +93,6 @@ const Auth = () => {
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </form>
-              
-              <div className="mt-6 p-4 bg-muted rounded-lg">
-                <p className="text-sm font-medium mb-2">Usuarios de prueba:</p>
-                <div className="text-xs space-y-1 text-muted-foreground">
-                  <p>Admin: admin@saludvital.com</p>
-                  <p>Médico: medico@saludvital.com</p>
-                  <p>Paciente: paciente@saludvital.com</p>
-                  <p className="mt-2 italic">Contraseña: cualquiera</p>
-                </div>
-              </div>
             </TabsContent>
 
             <TabsContent value="register">

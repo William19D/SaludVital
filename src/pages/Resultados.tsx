@@ -14,11 +14,9 @@ interface Resultado {
 }
 
 const Resultados = () => {
-  const resultados: Resultado[] = [
-    { id: '1', tipo: 'Análisis de Sangre', fecha: '2025-10-12', medico: 'Dr. García', estado: 'nuevo', descripcion: 'Hemograma completo y perfil lipídico' },
-    { id: '2', tipo: 'Radiografía Torácica', fecha: '2025-10-10', medico: 'Dr. Rodríguez', estado: 'visto', descripcion: 'Control post-operatorio' },
-    { id: '3', tipo: 'Electrocardiograma', fecha: '2025-10-08', medico: 'Dr. García', estado: 'visto', descripcion: 'Evaluación cardiológica de rutina' },
-  ];
+  // TODO: Cargar resultados desde Supabase
+  const resultados: Resultado[] = [];
+
 
   return (
     <DashboardLayout>
