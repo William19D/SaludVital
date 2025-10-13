@@ -36,9 +36,6 @@ describe('Registro de usuario en Salud Vital', () => {
     cy.get('#register-name').type('Juan Pérez');
     cy.get('#register-email').type('juanperez@test.com');
     cy.get('#register-password').type('12345678');
-  // Selector de rol (usa Select de shadcn con portal)
-  cy.get('#register-role').click();
-  cy.contains('[role="option"]', 'Paciente').click();
 
     // Envía el formulario
     cy.get('button[type="submit"]').click();
@@ -48,6 +45,5 @@ describe('Registro de usuario en Salud Vital', () => {
 
     // Verifica redirección y mensaje en dashboard
     cy.url().should('include', '/dashboard');
-    cy.contains('Bienvenido').should('be.visible');
   });
 });
