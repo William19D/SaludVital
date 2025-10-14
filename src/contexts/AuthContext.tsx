@@ -111,7 +111,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('💾 Sesión guardada en localStorage');
       
       toast.success('Inicio de sesión exitoso');
-      navigate('/dashboard/citas');
+      
+      // Redirigir según el rol del usuario
+      console.log('🔄 Redirigiendo según rol:', userData.role);
+      if (userData.role === 'medico') {
+        navigate('/dashboard/doctor');
+      } else {
+        navigate('/dashboard/citas');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión';
       console.error('❌ Error en login:', errorMessage);
@@ -146,7 +153,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('saludvital_tokens', JSON.stringify(response.tokens));
       
       toast.success('Registro exitoso');
-      navigate('/dashboard/citas');
+      
+      // Redirigir según el rol del usuario
+      console.log('🔄 Redirigiendo según rol después del registro:', userData.role);
+      if (userData.role === 'medico') {
+        navigate('/dashboard/doctor');
+      } else {
+        navigate('/dashboard/citas');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al registrar usuario';
       toast.error(errorMessage);

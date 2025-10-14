@@ -338,6 +338,141 @@ export interface DoctorInfo {
   };
 }
 
+// Interfaz para citas de doctor
+export interface DoctorAppointment {
+  appointment_id: string;
+  date: string;
+  time: string;
+  estimated_end_time: string;
+  duration_minutes: number;
+  status: string;
+  status_label: string;
+  status_icon: string;
+  appointment_type: string;
+  appointment_type_label: string;
+  reason: string;
+  notes?: string;
+  cancellation_reason?: string;
+  cancelled_at?: string;
+  reminder_sent: boolean;
+  created_at: string;
+  updated_at: string;
+  patient: {
+    id: string;
+    user_id: string;
+    full_name: string;
+    email: string;
+    phone?: string;
+    age?: number;
+    date_of_birth?: string;
+    gender?: string;
+    address?: string;
+    blood_type?: string;
+    allergies: string[];
+    chronic_conditions: string[];
+    current_medications: string[];
+    insurance_provider?: string;
+    insurance_number?: string;
+    preferred_language?: string;
+    emergency_contact: {
+      name?: string;
+      phone?: string;
+    };
+  };
+}
+
+export interface DoctorAppointmentsResponse {
+  success: boolean;
+  data: {
+    appointments: DoctorAppointment[];
+    statistics: {
+      total_appointments: number;
+      today_appointments: number;
+      upcoming_appointments: number;
+      completed_appointments: number;
+      cancelled_appointments: number;
+      status_breakdown: Record<string, number>;
+      type_breakdown: Record<string, number>;
+    };
+    pagination: {
+      page: number;
+      limit: number;
+      total_results: number;
+      has_more: boolean;
+    };
+    filters_applied: {
+      date?: string;
+      status?: string;
+      type?: string;
+      sort_by: string;
+      sort_order: string;
+    };
+    doctor_info: {
+      doctor_id: string;
+      user_id: string;
+      specialization: string;
+      is_available: boolean;
+    };
+    system_info: {
+      queried_by: string;
+      queried_at: string;
+      timezone: string;
+    };
+  };
+  message: string;
+}
+
+// Interfaces para completar cita
+export interface CompleteAppointmentParams {
+  appointment_id: string;
+  medical_notes: string;
+  follow_up_required?: string;
+}
+
+export interface CompleteAppointmentResponse {
+  success: boolean;
+  data: {
+    appointment: {
+      id: string;
+      appointment_date: string;
+      appointment_time: string;
+      duration_minutes: number;
+      status: string;
+      appointment_type: string;
+      reason: string;
+      notes: string;
+      updated_at: string;
+    };
+    completed_by: {
+      user_id: string;
+      role: string;
+      email: string;
+    };
+    patient_info: {
+      name: string;
+      email: string;
+    };
+    doctor_info: {
+      specialization: string;
+    };
+    email_notification: {
+      sent: boolean;
+      recipient: string;
+      from: string;
+      message: string;
+    };
+    system_info: {
+      completed_by: string;
+      completed_at_local: string;
+      timezone: string;
+      email_provider: string;
+      email_domain: string;
+      follow_up_required?: string;
+    };
+  };
+  message: string;
+}
+
 // ============================================
 // FUNCIONES DE GESTIÓN DE ROLES
 // ============================================
@@ -505,6 +640,68 @@ export default {
     });
     
     return response.json();
+  },
+  getDoctorAppointments: async (
+    token: string,
+    filters?: {
+      date?: string;
+      status?: string;
+      type?: string;
+      page?: number;
+      limit?: number;
+      sort?: string;
+      order?: 'ASC' | 'DESC';
+    }
+  ): Promise<DoctorAppointmentsResponse> => {
+    const params = new URLSearchParams();
+    if (filters?.date) params.append('date', filters.date);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.sort) params.append('sort', filters.sort);
+    if (filters?.order) params.append('order', filters.order);
+
+    const url = `https://fbstreidlkukbaqtlpon.supabase.co/functions/v1/get-doctor-appointments${params.toString() ? `?${params.toString()}` : ''}`;
+    
+    console.log(`🩺 Obteniendo citas del doctor con URL: ${url}`);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getHeaders(token)
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error('❌ Error obteniendo citas del doctor:', result);
+      throw new Error(result.error || 'Error obteniendo las citas del doctor');
+    }
+
+    console.log('✅ Citas del doctor obtenidas exitosamente:', result.data?.appointments?.length || 0, 'citas');
+    return result;
+  },
+  completeAppointment: async (
+    token: string, 
+    data: CompleteAppointmentParams
+  ): Promise<CompleteAppointmentResponse> => {
+    console.log('✅ Completando cita:', data.appointment_id);
+    
+    const response = await fetch('https://fbstreidlkukbaqtlpon.supabase.co/functions/v1/complete-appointment', {
+      method: 'POST',
+      headers: getHeaders(token),
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error('❌ Error completando cita:', result);
+      throw new Error(result.error || 'Error completando la cita');
+    }
+
+    console.log('✅ Cita completada exitosamente:', result.data?.appointment?.id);
+    return result;
   },
   // Utils
   isConfigured,

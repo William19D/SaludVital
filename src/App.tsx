@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Citas from "./pages/Citas";
+import Doctor from "./pages/Doctor";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Navigate to="/dashboard/citas" replace />} />
             <Route path="/dashboard/citas" element={<ProtectedRoute><Citas /></ProtectedRoute>} />
+            <Route path="/dashboard/doctor" element={<ProtectedRoute><Doctor /></ProtectedRoute>} />
             {/* Rutas deshabilitadas - redirigen a citas */}
             <Route path="/dashboard/resultados" element={<Navigate to="/dashboard/citas" replace />} />
             <Route path="/dashboard/alertas" element={<Navigate to="/dashboard/citas" replace />} />
