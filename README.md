@@ -1,4 +1,4 @@
-## Project informations
+## Project information
 
 ## How can I edit this code?
 
