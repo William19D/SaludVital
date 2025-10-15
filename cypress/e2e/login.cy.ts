@@ -7,8 +7,8 @@ describe('Inicio de sesión en Salud Vital', () => {
       body: { email?: string; password?: string };
       reply: (res: { statusCode: number; body: unknown }) => void;
     }
-    // Mock de Edge Function login (URL exacta de Supabase)
-    cy.intercept('POST', 'https://fbstreidlkukbaqtlpon.supabase.co/functions/v1/login', (req: InterceptReq) => {
+  // Mock de Edge Function login (usar patrón glob para que coincida independientemente del host)
+  cy.intercept('POST', '**/functions/v1/login', (req: InterceptReq) => {
       const { email, password } = req.body;
       if (email === 'juanperez@test.com' && password === '12345678') {
         req.reply({
@@ -49,8 +49,8 @@ describe('Inicio de sesión en Salud Vital', () => {
     cy.get('#login-password').type('12345678');
     cy.get('button[type="submit"]').click();
 
-    cy.wait('@loginUser');
-    cy.url().should('include', '/dashboard');
+  cy.wait('@loginUser').its('request.body').should('include', { email: 'juanperez@test.com' });
+  cy.url().should('include', '/dashboard');
     
   });
 
@@ -60,7 +60,7 @@ describe('Inicio de sesión en Salud Vital', () => {
     cy.get('#login-password').type('error123');
     cy.get('button[type="submit"]').click();
 
-    cy.wait('@loginUser');
+  cy.wait('@loginUser').its('request.body').should('include', { email: 'usuario@falso.com' });
     // Puede aparecer el mensaje del backend o el mensaje genérico del UI
     cy.contains(/(Credenciales inválidas|Error al iniciar sesión\. Verifica tus credenciales\.)/)
       .should('be.visible');
